@@ -18,7 +18,7 @@ st.set_page_config(page_title="Manuela State-of-the-Art AI", page_icon="🎯")
 
 @st.cache_resource
 def load_latest_yolo():
-    # Carichiamo YOLO11 Nano: l'ultima frontiera della Computer Vision (2026)
+    # Carichiamo YOLO11 Nano
     return YOLO('yolo11n.pt') 
 
 model = load_latest_yolo()
@@ -29,7 +29,7 @@ st.write("Analisi multi-oggetto ad alta precisione con integrazione **OpenStack 
 uploaded_files = st.file_uploader("Carica le tue immagini...", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
 
 if uploaded_files:
-    if st.button('Esegui Inferenza nel Cloud'):
+    if st.button('Esegui Analisi'):
         try:
             conn = client.Connection(**config)
             

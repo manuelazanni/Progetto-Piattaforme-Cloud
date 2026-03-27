@@ -14,7 +14,7 @@ def analizza(percorso_foto):
 
     model = YOLO('yolo11n.pt')
     
-    # Upload su Swift (così il prof vede che carichi sul Cloud anche da CLI)
+    # Upload su Swif
     conn = client.Connection(**config)
     with open(percorso_foto, 'rb') as f:
         conn.put_object('immagini_ia', f"terminale_{os.path.basename(percorso_foto)}", contents=f.read())
