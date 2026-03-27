@@ -1,10 +1,10 @@
 # Progetto Piattaforme Cloud: Architettura cloud per object detection distribuita
 
-Questo progetto implementa un sistema di intelligenza artificiale per il riconoscimento di oggetti nelle immagini integrato all'interno di un'infrastruttura Cloud **OpenStack (DevStack)**.
+Questo progetto implementa un sistema di intelligenza artificiale per il riconoscimento di oggetti nelle immagini integrato all'interno di un'infrastruttura cloud **OpenStack**.
 
 
 ## Obiettivi del progetto
-L'obiettivo è dimostrare l'integrazione tra algoritmi di Computer Vision (YOLO11) e i servizi core di un ambiente IaaS, gestendo il ciclo di vita dei dati e dei modelli interamente sul Cloud.
+L'obiettivo è dimostrare l'integrazione tra algoritmi di Computer Vision (YOLO11) e i servizi core di un ambiente IaaS, gestendo il ciclo di vita dei dati e dei modelli interamente sul cloud.
 
 ## Architettura e servizi OpenStack utilizzati
 
