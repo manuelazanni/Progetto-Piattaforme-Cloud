@@ -1,0 +1,10 @@
+# Non caricare il modello pesante (è già su Glance!)
+yolo11n.pt
+*.pt
+
+# Non caricare file temporanei di Python
+__pycache__/
+*.pyc
+
+# Non caricare i risultati locali di YOLO (se presenti)
+runs/
