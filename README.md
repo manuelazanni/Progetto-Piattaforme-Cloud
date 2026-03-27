@@ -1,4 +1,4 @@
-# Progetto Piattaforme Cloud: Architettura cloud per object detection distribuita
+# Progetto Piattaforme Cloud: Architettura cloud per object detection
 
 Questo progetto implementa un sistema di intelligenza artificiale per il riconoscimento di oggetti nelle immagini integrato all'interno di un'infrastruttura cloud **OpenStack**.
 
