@@ -4,7 +4,7 @@ Questo progetto implementa un sistema di intelligenza artificiale per il riconos
 
 
 ## Obiettivi del progetto
-L'obiettivo è dimostrare l'integrazione tra algoritmi di Computer Vision (YOLO11) e i servizi core di un ambiente IaaS, gestendo il ciclo di vita dei dati e dei modelli interamente sul cloud.
+Il progetto illustra lo sviluppo e l'integrazione di un AI service plugin all'interno di un'architettura cloud basata su OpenStack. L'obiettivo principale è estendere le funzionalità core della piattaforma, introducendo un modulo di analisi intelligente delle immagini basato sull'algoritmo YOLO11.
 
 ## Architettura e servizi OpenStack utilizzati
 
