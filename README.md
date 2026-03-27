@@ -1,4 +1,4 @@
-# Progetto Piattaforme Cloud: Object Detection con YOLO11 e OpenStack
+# Progetto Piattaforme Cloud: Architettura cloud per object detection distribuita
 
 Questo progetto implementa un sistema di intelligenza artificiale per il riconoscimento di oggetti nelle immagini integrato all'interno di un'infrastruttura Cloud **OpenStack (DevStack)**.
 
