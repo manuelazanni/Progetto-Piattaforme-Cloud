@@ -12,7 +12,7 @@ Il sistema non lavora in locale, ma sfrutta i seguenti componenti di OpenStack:
 
 * **Keystone (Identity Service):** gestisce l'autenticazione tramite API v3 e la separazione dei progetti.
 * **Glance (Image Service):** utilizzato come repository centralizzato per i pesi del modello (`yolo11n.pt`). Il modello è registrato come artefatto binario.
-* **Swift (Object Storage):** utilizzato per l'archiviazione persistente delle immagini analizzate. Ogni upload segue una naming convention specifica (`terminale_` o `yolo11_`) per distinguere la sorgente.
+* **Swift (Object Storage):** utilizzato per l'archiviazione persistente delle immagini analizzate. Ogni upload segue una naming convention specifica (`terminale_` o `UI_`) per distinguere la sorgente.
 
 
 ## Struttura del repository
