@@ -1,79 +1,111 @@
 import streamlit as st
-from ultralytics import YOLO
-from swiftclient import client
-import PIL.Image
+import os
+import hashlib
 import io
-import numpy as np
+from PIL import Image
+from ultralytics import YOLO
+from keystoneauth1.identity import v3
+from keystoneauth1 import session
+from glanceclient import Client as GlanceClient
+from swiftclient import client as swift_client
 
-# --- Configurazione OpenStack (Verifica che l'IP sia corretto) ---
-config = {
-    'authurl': 'http://192.168.188.131/identity/v3',
-    'user': 'admin', 
-    'key': 'secret',
-    'os_options': {'project_name': 'admin', 'project_domain_name': 'Default', 'user_domain_name': 'Default'},
-    'auth_version': '3'
-}
+# --- CONFIGURAZIONE ---
+AUTH_URL = "http://192.168.188.131/identity/v3"
+USERNAME = "admin"
+PASSWORD = "secret"
+PROJECT_NAME = "admin"
 
-st.set_page_config(page_title="Manuela State-of-the-Art AI", page_icon="🎯")
+# --- CONFIGURAZIONE MODELLO ---
+MODEL_NAME_ON_GLANCE = "YOLO11-Model-v1" 
+LOCAL_FILE_PATH = "YOLO11-Model-v1.pt" 
 
-@st.cache_resource
-def load_latest_yolo():
-    # Carichiamo YOLO11 Nano
-    return YOLO('yolo11n.pt') 
+def get_local_md5(filename):
+    if not os.path.exists(filename):
+        return None
+    hash_md5 = hashlib.md5()
+    with open(filename, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
-model = load_latest_yolo()
+# --- SIDEBAR (Grafica Tech Stack) ---
+with st.sidebar:
+    st.markdown("### Tech Stack 2026")
+    st.markdown("- **Model:** YOLO11 Nano")
+    st.markdown("- **Infrastructure:** OpenStack")
+    st.markdown("- **Library:** Ultralytics")
 
-st.title("Progetto Piattafrome Cloud Computing")
-st.write("Analisi multi-oggetto ad alta precisione con integrazione **OpenStack Object Storage**.")
+st.title("AI Cloud Analyzer")
 
-uploaded_files = st.file_uploader("Carica le tue immagini...", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
+try:
+    auth = v3.Password(auth_url=AUTH_URL, username=USERNAME, password=PASSWORD,
+                       project_name=PROJECT_NAME, user_domain_name="Default",
+                       project_domain_name="Default")
+    sess = session.Session(auth=auth)
+    glance = GlanceClient('2', session=sess)
+    swift = swift_client.Connection(session=sess)
 
-if uploaded_files:
-    if st.button('Esegui Analisi'):
-        try:
-            conn = client.Connection(**config)
-            
-            for uploaded_file in uploaded_files:
-                img_bytes = uploaded_file.getvalue()
+    # Verifica e sincronizzazione modello
+    remote_img = next(glance.images.list(filters={'name': MODEL_NAME_ON_GLANCE}))
+    remote_checksum = remote_img.checksum
+    local_checksum = get_local_md5(LOCAL_FILE_PATH)
+
+    if local_checksum != remote_checksum:
+        with st.status(f"Scaricamento {MODEL_NAME_ON_GLANCE}...", expanded=True) as status:
+            with open(LOCAL_FILE_PATH, 'wb') as f:
+                for chunk in glance.images.data(remote_img.id):
+                    f.write(chunk)
+            status.update(label="Modello scaricato!", state="complete", expanded=False)
+    else:
+        st.info(f"Modello '{MODEL_NAME_ON_GLANCE}' pronto.")
+
+    # Caricamento immagini
+    uploaded_files = st.file_uploader("Carica le tue immagini...", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
+
+    if uploaded_files:
+        model = YOLO(LOCAL_FILE_PATH, task="detect")
+        
+        for uploaded_file in uploaded_files:
+            with st.expander(f"Dettagli Analisi: {uploaded_file.name}", expanded=True):
+                # Analisi
+                input_image = Image.open(uploaded_file)
+                results = model(input_image, verbose=False)
                 
-                # 1. Archiviazione su OpenStack Swift
-                nome_remoto = f"yolo11_{uploaded_file.name}"
-                conn.put_object('immagini_ia', nome_remoto, contents=img_bytes)
+                # Rendering immagine
+                res_plotted = results[0].plot()
+                res_image = Image.fromarray(res_plotted[:, :, ::-1])
                 
-                # 2. Analisi IA con YOLO11
-                img = PIL.Image.open(io.BytesIO(img_bytes))
-                results = model.predict(source=img, conf=0.25)
+                # Layout a due colonne (Immagine | Testo)
+                col_img, col_txt = st.columns([2, 1])
                 
-                with st.expander(f"Dettagli Analisi: {uploaded_file.name}", expanded=True):
-                    col1, col2 = st.columns([2, 1])
+                with col_img:
+                    st.image(res_image, caption="Rilevamento YOLO11", use_container_width=True)
+
+                with col_txt:
+                    # Banner verde di stato salvataggio
+                    st.success("Dato salvato su Swift")
                     
-                    with col1:
-                        # Visualizzazione con Bounding Boxes (Riquadri colorati)
-                        res_plotted = results[0].plot()
-                        st.image(res_plotted, channels="BGR", caption="Rilevamento YOLO11", use_container_width=True)
-                        
-                    with col2:
-                        st.success(f"Dato salvato su Swift")
-                        st.write("**Oggetti identificati:**")
-                        
-                        labels = results[0].boxes.cls.tolist()
-                        names = results[0].names
-                        unique_labels = set(labels)
-                        
-                        if unique_labels:
-                            for label_id in unique_labels:
-                                name = names[int(label_id)]
-                                count = labels.count(label_id)
-                                st.write(f"- {name.upper()}: `{count}`")
-                        else:
-                            st.info("Nessun oggetto rilevato.")
+                    st.markdown("**Oggetti identificati:**")
+                    # Contiamo gli oggetti per la lista (es. DOG: 1)
+                    counts = {}
+                    for box in results[0].boxes:
+                        label = model.names[int(box.cls[0])].upper()
+                        counts[label] = counts.get(label, 0) + 1
+                    
+                    for label, count in counts.items():
+                        st.write(f"- {label}: {count}")
 
-            st.balloons()
-        except Exception as e:
-            st.error(f"Errore di sistema: {e}")
+                # Upload su Swift (Automatico)
+                nome_cloud = f"UI_{uploaded_file.name}"
+                img_buffer = io.BytesIO()
+                res_image.save(img_buffer, format="JPEG")
+                img_buffer.seek(0)
+                
+                swift.put_container("immagini_ia")
+                swift.put_object("immagini_ia", nome_cloud, contents=img_buffer)
+                st.success(f"Archiviato su Swift nel container immagini_ia come: {nome_cloud}")
+                st.markdown("---")
 
-st.sidebar.markdown("---")
-st.sidebar.subheader("Tech Stack 2026")
-st.sidebar.write("- Model: **YOLO11 Nano**")
-st.sidebar.write("- Infrastructure: **OpenStack**")
-st.sidebar.write("- Library: **Ultralytics**")
+
+except Exception as e:
+    st.error(f"Errore: {e}")
