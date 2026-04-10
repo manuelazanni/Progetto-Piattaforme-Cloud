@@ -1,10 +1,16 @@
-# Non caricare il modello pesante (è già su Glance!)
-yolo11n.pt
+# Modelli YOLO
 *.pt
 
-# Non caricare file temporanei di Python
-__pycache__/
-*.pyc
+# Credenziali
+user.env
+*.env
 
-# Non caricare i risultati locali di YOLO (se presenti)
-runs/
+# File temporanei generati dagli script
+temp_*
+UI_*
+terminale_*
+
+# Cache di Python e Streamlit
+__pycache__/
+.streamlit/
+.ipynb_checkpoints/
