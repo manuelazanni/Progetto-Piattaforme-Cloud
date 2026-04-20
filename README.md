@@ -30,7 +30,7 @@ enable_plugin progetto-ia https://github.com/tuo-utente/progetto-ia
 Successivamente, esegui ./stack.sh. Il plugin installerà automaticamente le dipendenze Python necessarie
 
 ## Setup
-Prima di avviare l'applicazione, è necessario configurare l'ambiente Cloud tramite CLI di OpenStack creando il porgetto e l'utente dedicato.
+Prima di avviare l'applicazione, è necessario configurare l'ambiente Cloud tramite CLI di OpenStack creando il progetto e l'utente dedicato.
 
 openstack project create --domain default IA_Lab
 openstack user create --domain default --project IA_Lab --password tua_password utente_1
